@@ -1,5 +1,5 @@
 //
-//  Persistence.swift
+//  RMPersistance.swift
 //  RickAndMortyApp
 //
 //  Created by Ruben Alonso on 16/6/23.
@@ -15,23 +15,19 @@ enum NetworkErrors: String, Error {
     case badParse = "Failure to parse"
 }
 
-protocol NetworkPersistence {
-    func loadRM() async throws -> [ResultsModel]
-}
-
-final class RMPersistance: NetworkPersistence {
+final class RMPersistance {
     static let shared = RMPersistance()
     
     private init() {}
     
-    func loadRM() async throws -> [ResultsModel] {
+    func loadCharacters() async throws -> [RMModel] {
         let (data, response) = try await URLSession.shared.data(for: .getRequest(url: .getCharacters))
         guard let httpResponse = response as? HTTPURLResponse else { throw NetworkErrors.badResponse }//casteamos para tener el statusCode
         
         switch httpResponse.statusCode {
         case 200...299:
             do {
-                return try JSONDecoder().decode([ResultsModel].self, from: data)
+                return try JSONDecoder().decode([RMModel].self, from: data)
             } catch {
                 throw NetworkErrors.failedToParseData
             }
@@ -39,6 +35,48 @@ final class RMPersistance: NetworkPersistence {
             throw NetworkErrors.notFound
         case 500...550:
             throw NetworkErrors.notFound
+        default:
+            throw NetworkErrors.unknow
+        }
+    }
+    
+    func loadEpisodes() async throws -> [RMModel] {
+        let (data, response) = try await URLSession.shared.data(for: .getRequest(url: .getEpisodes))
+        guard let httpResponse = response as? HTTPURLResponse else { throw NetworkErrors.badResponse }
+        
+        switch httpResponse.statusCode {
+        case 200...299:
+            do {
+                return try JSONDecoder().decode([RMModel].self, from: data)
+            } catch {
+                throw NetworkErrors.failedToParseData
+            }
+        case 400...450:
+            throw NetworkErrors.notFound
+        case 500...550:
+            throw NetworkErrors.notFound
+        default:
+            throw NetworkErrors.unknow
+        }
+    }
+    
+    func loadLocations() async throws -> [RMModel] {
+        let (data, response) = try await URLSession.shared.data(for: .getRequest(url: .getLocations))
+        guard let httpResponse = response as? HTTPURLResponse else { throw NetworkErrors.badResponse }
+        
+        switch httpResponse.statusCode {
+        case 200...299:
+            do {
+                return try JSONDecoder().decode([RMModel].self, from: data)
+            } catch {
+                throw NetworkErrors.failedToParseData
+            }
+        case 400...450:
+            throw NetworkErrors.notFound
+        case 500...550:
+            throw NetworkErrors.notFound
+        default:
+            throw NetworkErrors.unknow
         }
     }
 }

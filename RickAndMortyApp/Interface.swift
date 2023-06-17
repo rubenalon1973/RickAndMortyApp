@@ -12,8 +12,8 @@ let mainURL = URL(string: "https://rickandmortyapi.com/api")!
 //creamos url en sist. para llamarlas más fáciles
 extension URL {
     static let getCharacters = mainURL.appending(path: "character")
-    static let getLocations = mainURL.appending(path: "location")
     static let getEpisodes = mainURL.appending(path: "episodes")
+    static let getLocations = mainURL.appending(path: "location")
 }
 
 extension URLRequest {
